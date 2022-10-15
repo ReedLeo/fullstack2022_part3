@@ -60,10 +60,29 @@ const generateId = () => {
     return Math.floor(Math.random()*100000000)
 }
 
+const generateErrMsg = (body) => {
+    if (body) {
+        if (body.name && body.number) {
+            if (persons.find(p => p.name === body.name)) {
+                return {error: 'name must be unique'}
+            } else {
+                return null
+            }
+        } else {
+            return {error: 'The name or number is missing'}
+        }
+    } else {
+        return {error:'Body is missing'}
+    }
+}
+
 app.post('/api/persons', (request, response) => {
     const body = request.body
     console.log('POST body is', body)
-    if (body) {
+    const errMsg = generateErrMsg(body)
+    if (errMsg) {
+        response.status(400).json(errMsg)
+    } else {
         const newOne = {
             id: generateId(),
             name: body.name,
@@ -71,8 +90,6 @@ app.post('/api/persons', (request, response) => {
         }
         persons = persons.concat(newOne)
         response.status(200).end()
-    } else {
-        response.send('Body is missing').end()
     }
 })
 
